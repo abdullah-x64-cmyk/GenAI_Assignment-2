@@ -80,9 +80,9 @@ Table~\ref{tab:cache-final} shows lower decode latency and peak allocation for c
 \label{sec:tiled-attention}
 We implemented a materialized scaled dot-product attention reference and a tiled online-softmax variant in \texttt{src/online\_attention.py}. For each query tile, the tiled method visits key/value tiles and maintains a running maximum $m$, normalization sum $l$, and weighted-value accumulator $a$. For score tile $S$, it updates $m\prime=\max(m,\max(S))$, rescales the previous state by $\alpha=\exp(m-m\prime)$, then adds the shifted tile exponentials to $l$ and their product with values to $a$. The output is $a/l$. This is numerically stable because exponentials are evaluated after subtracting the current maximum. Half and bfloat16 inputs are accumulated in float32. Fully masked rows return zero.
 
-The reference and tiled paths accept boolean visibility masks and additive score masks, including negative infinity for blocked positions. Causal masking allows each query to attend only to its current and preceding keys. For a shorter query suffix over a longer KV sequence, positions are bottom-right aligned. Tests exercise causal attention, additive and boolean masks, fully masked rows, uneven tile boundaries, and suffix queries; outputs agree with the reference and PyTorch SDPA within tight float64 tolerances. The test command and general benchmark command are documented in the README. The current local host has CPU-only PyTorch, so this run could not measure CUDA peak memory.
+The reference and tiled paths accept boolean visibility masks and additive score masks, including negative infinity for blocked positions. Causal masking allows each query to attend only to its current and preceding keys. For a shorter query suffix over a longer KV sequence, positions are bottom-right aligned. Tests exercise causal attention, additive and boolean masks, fully masked rows, uneven tile boundaries, and suffix queries; outputs agree with the reference and PyTorch SDPA within tight float64 tolerances. The test command and general benchmark command are documented in the README.
 
-Table~\ref{tab:attention-cpu} reports a small CPU comparison (batch 1, two heads, head dimension 16, float32; two timed iterations after one warmup). The complete measurements are in \texttt{results/attention\_benchmark\_cpu.json}. At these short lengths, the tiled educational implementation is slower than the materialized reference and PyTorch SDPA. Its theoretical score workspace is smaller: at length 64, the reference score matrix uses 32 KiB while a 16-by-16 tile uses 2 KiB for the same batch, head count, and dtype. This compares score tensors only, not total process memory. The local measurements are noisy and do not establish GPU performance.
+Table~\ref{tab:attention-cpu} reports the small CPU comparison (batch 1, two heads, head dimension 16, float32; two timed iterations after one warmup); the complete measurements are in \texttt{results/attention\_benchmark\_cpu.json}. We also benchmarked on a Tesla T4 with batch 1, four heads, head dimension 32, float32, causal masking, 32-by-64 tiles, three warmups, and ten timed iterations. Table~\ref{tab:attention-t4} and \texttt{results/attention\_benchmark\_t4.json} report medians, maximum absolute error, and peak CUDA allocation. Every method passed the configured tolerance; tiled attention's maximum absolute errors were below $4.2\times10^{-7}$. At length 512, measured peak allocation was 30.83 MB for the reference and 10.38 MB for tiled attention. The tiled Python implementation was substantially slower, taking 89.22 ms versus 0.90 ms for the materialized reference at this length. This demonstrates the memory/runtime tradeoff for this implementation and run; allocation includes runtime and other live tensors, not just the score matrix.
 
 \begin{table}[t]
 \centering
@@ -98,5 +98,26 @@ Length & Reference & Tiled online & PyTorch SDPA \\
 \end{tabular}
 \end{table}
 
-The reference and tiled implementations are educational PyTorch code, not fused CUDA kernels. The tiled version dispatches several tensor operators and Python loop iterations per block; optimized attention kernels fuse score calculation, online normalization, and value accumulation while reducing memory traffic. It is therefore reasonable for this clear implementation to run slower even though its live score tile is smaller.
+\begin{table}[t]
+\centering
+\caption{Tesla T4 causal attention benchmark. Time is median milliseconds; memory is peak CUDA allocation in decimal MB.}
+\label{tab:attention-t4}
+\begin{tabular}{r l r r r}
+\hline
+Length & Method & Time (ms) & Peak (MB) & Max error \\
+\hline
+64 & Reference & 0.744 & 8.98 & 0 \\
+64 & Tiled online & 1.773 & 8.88 & $3.58\times10^{-7}$ \\
+64 & PyTorch SDPA & 0.070 & 8.75 & $5.96\times10^{-7}$ \\
+256 & Reference & 0.727 & 14.37 & 0 \\
+256 & Tiled online & 22.877 & 9.50 & $4.17\times10^{-7}$ \\
+256 & PyTorch SDPA & 0.140 & 9.47 & $6.26\times10^{-7}$ \\
+512 & Reference & 0.900 & 30.83 & 0 \\
+512 & Tiled online & 89.215 & 10.38 & $3.87\times10^{-7}$ \\
+512 & PyTorch SDPA & 0.250 & 10.49 & $7.15\times10^{-7}$ \\
+\hline
+\end{tabular}
+\end{table}
+
+The reference and tiled implementations are educational PyTorch code, not fused CUDA kernels. The tiled version dispatches several tensor operators and Python loop iterations per block; optimized attention kernels fuse score calculation, online normalization, and value accumulation while reducing memory traffic. This explains why our tiled method can use less peak allocation at longer lengths yet run much slower than both the materialized baseline and PyTorch SDPA. The T4 benchmark uses a single fixed shape and a short microbenchmark, so its timing should not be generalized to other workloads or GPUs.
 \bibliographystyle{IEEEtran}\bibliography{references}\end{document}

@@ -175,10 +175,19 @@ tolerances. The current local CPU microbenchmark is in
 iterations). At lengths 32 and 64, the reference took 2.16 and 0.76 ms, the
 educational tiled implementation 3.68 and 7.69 ms, and PyTorch SDPA 0.15 ms
 for both. These small CPU timings are noisy and do not predict GPU performance.
-Peak CUDA memory was unavailable on this CPU-only host. Score-workspace
-estimates at length 64 are 32 KiB for a fully materialized score matrix and
-2 KiB for a 16x16 score tile (B=1, H=2, float32); these exclude other
-temporaries and do not represent measured process memory.
+
+A separate Colab Tesla T4 run used B=1, H=4, D=32, float32, causal masking,
+tile sizes 32x64, three warmups, and ten timed iterations. The full measured
+summary is in `results/attention_benchmark_t4.json`. All methods agreed with
+the reference under the configured tolerance at lengths 64, 256, and 512
+(maximum absolute error for tiled attention was below 4.2e-7). Median times
+(reference / tiled / PyTorch SDPA, ms) were 0.744 / 1.773 / 0.070 at length
+64, 0.727 / 22.877 / 0.140 at 256, and 0.900 / 89.215 / 0.250 at 512. The
+educational tiled implementation reduced measured peak CUDA allocation at
+length 512 from 30.83 MB to 10.38 MB, while increasing runtime substantially.
+CUDA peak allocation includes live tensors and allocator/runtime effects, not
+just the score matrix. These results cover one GPU run and should not be
+interpreted as broad hardware performance guarantees.
 
 The tiled method is for demonstrating the algorithm and controlling
 intermediate score storage. It uses Python loops and multiple ordinary PyTorch

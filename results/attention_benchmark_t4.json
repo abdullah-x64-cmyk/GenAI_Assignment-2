@@ -1,0 +1,23 @@
+{
+  "device": "cuda",
+  "cuda_name": "Tesla T4",
+  "dtype": "torch.float32",
+  "shape": {"batch": 1, "heads": 4, "head_dim": 32},
+  "causal": true,
+  "tile_q": 32,
+  "tile_k": 64,
+  "warmup_iterations": 3,
+  "timed_iterations": 10,
+  "source": "Colab T4 run; medians and peak allocations transcribed from benchmark output",
+  "records": [
+    {"length":64,"method":"reference","median_seconds":0.000744,"peak_cuda_allocated_bytes":8982528,"max_abs_error_vs_reference":0.0,"allclose_vs_reference":true,"materialized_score_tensor_bytes":65536},
+    {"length":64,"method":"tiled_online","median_seconds":0.001773,"peak_cuda_allocated_bytes":8876544,"max_abs_error_vs_reference":3.58e-7,"allclose_vs_reference":true,"maximum_tiled_score_tensor_bytes":32768},
+    {"length":64,"method":"pytorch_sdpa","median_seconds":0.000070,"peak_cuda_allocated_bytes":8750080,"max_abs_error_vs_reference":5.96e-7,"allclose_vs_reference":true},
+    {"length":256,"method":"reference","median_seconds":0.000727,"peak_cuda_allocated_bytes":14366720,"max_abs_error_vs_reference":0.0,"allclose_vs_reference":true,"materialized_score_tensor_bytes":1048576},
+    {"length":256,"method":"tiled_online","median_seconds":0.022877,"peak_cuda_allocated_bytes":9499136,"max_abs_error_vs_reference":4.17e-7,"allclose_vs_reference":true,"maximum_tiled_score_tensor_bytes":32768},
+    {"length":256,"method":"pytorch_sdpa","median_seconds":0.000140,"peak_cuda_allocated_bytes":9470976,"max_abs_error_vs_reference":6.26e-7,"allclose_vs_reference":true},
+    {"length":512,"method":"reference","median_seconds":0.000900,"peak_cuda_allocated_bytes":30830592,"max_abs_error_vs_reference":0.0,"allclose_vs_reference":true,"materialized_score_tensor_bytes":4194304},
+    {"length":512,"method":"tiled_online","median_seconds":0.089215,"peak_cuda_allocated_bytes":10383872,"max_abs_error_vs_reference":3.87e-7,"allclose_vs_reference":true,"maximum_tiled_score_tensor_bytes":32768},
+    {"length":512,"method":"pytorch_sdpa","median_seconds":0.000250,"peak_cuda_allocated_bytes":10486784,"max_abs_error_vs_reference":7.15e-7,"allclose_vs_reference":true}
+  ]
+}
