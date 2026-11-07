@@ -127,5 +127,20 @@ We implement greedy speculative decoding in \texttt{src/speculative\_decode.py}.
 
 The target is Qwen2.5-0.5B-Instruct with the trained LoRA adapter merged into its base weights. We form a smaller draft by copying this merged model and retaining only its first two of 24 decoder layers. The draft shares the target's embeddings, final normalization, output head, vocabulary, and tokenizer, while its retained layers inherit the target's adapted weights. This avoids token-ID remapping and duplicate vocabulary-scale weights. It may still predict poorly because most decoder layers are omitted, and a higher rejection rate can erase the savings from fewer target calls.
 
-The unit tests verify all-accepted rounds, rejected-token correction, EOS handling, cache-length alignment, and exact equality with ordinary greedy on deterministic toy models. The benchmark harness compares the same validation prompt prefixes with cached ordinary target greedy and writes generated-token equality, drafted and accepted counts, acceptance fraction, prefill/decode/total latency, throughput, and peak CUDA allocation to \texttt{results/speculative\_benchmark.json}. Real Qwen GPU results are pending; no acceptance, latency, throughput, or memory measurements are claimed until that benchmark completes. The CPU toy tests validate control flow only and are not evidence of model-level performance.
+The unit tests verify all-accepted rounds, rejected-token correction, EOS handling, cache-length alignment, and exact equality with ordinary greedy on deterministic toy models. We additionally benchmarked the fine-tuned target on a Tesla T4 with eager attention and float32. Table~\ref{tab:specbench} reports cached ordinary greedy against the two-layer speculative draft for 64 output tokens. In both validation-prompt cases, generated token IDs matched exactly. The draft accepted 0 of 250 proposed tokens (0\%); each run had 64 rounds and 64 rejected rounds. Consequently, speculative decoding was slower: its total runtime was 10.170 s versus 2.076 s for a 128-token prompt, and 7.721 s versus 2.166 s for a 512-token prompt. The draft's additional serial forward passes explain the slowdown when proposals are consistently rejected. Peak CUDA allocation was also higher for speculative decoding, as it keeps draft and target caches: 2166.92 versus 2085.61 MiB at 128 input tokens, and 2624.08 versus 2320.78 MiB at 512. Decode throughput fell from 31.59 to 6.33 tokens/s and from 31.84 to 8.51 tokens/s, respectively. The full measured log is provided in \texttt{results/speculative\_benchmark\_t4.json}. These two validation cases establish correctness and document this draft's poor acceptance; they do not establish a speedup or generalize to other prompts or hardware.
+
+\begin{table}[t]
+\centering
+\caption{Tesla T4 greedy speculative decoding benchmark (64 generated tokens; validation prompts).}
+\label{tab:specbench}
+\begin{tabular}{r|rr|rr|rr|c}
+\toprule
+Input & \multicolumn{2}{c|}{Total time (s)} & \multicolumn{2}{c|}{Decode tok/s} & \multicolumn{2}{c|}{Peak MiB} & Exact\\
+tokens & Greedy & Spec. & Greedy & Spec. & Greedy & Spec. & match\\
+\midrule
+128 & 2.076 & 10.170 & 31.59 & 6.33 & 2085.61 & 2166.92 & Yes\\
+512 & 2.166 & 7.721 & 31.84 & 8.51 & 2320.78 & 2624.08 & Yes\\
+\bottomrule
+\end{tabular}
+\end{table}
 \bibliographystyle{IEEEtran}\bibliography{references}\end{document}

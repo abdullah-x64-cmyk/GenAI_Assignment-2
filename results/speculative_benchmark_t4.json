@@ -1,0 +1,74 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "mode": "finetuned",
+  "split_prompt_source": "validation",
+  "device": "cuda:0",
+  "cuda_name": "Tesla T4",
+  "dtype": "torch.float32",
+  "attention_implementation": "eager",
+  "draft_model": "Qwen2.5-0.5B-Instruct with first 2 of 24 decoder layers retained; target embeddings, norm, lm_head, and tokenizer shared",
+  "draft_tokens_per_round": 4,
+  "measurement_note": "Measured on a single T4 run after warmup. CUDA allocation includes persistent model weights; incremental peak is relative to the live allocation immediately before each measured run. Throughput is shown for decode only and for prefill plus decode.",
+  "records": [
+    {
+      "input_tokens": 128,
+      "requested_output_tokens": 64,
+      "token_exact_match": true,
+      "ordinary": {
+        "generated_tokens": 64,
+        "prefill_seconds": 0.050565687,
+        "decode_seconds": 2.025887293,
+        "total_seconds": 2.076452979,
+        "decode_tokens_per_second": 31.59109602,
+        "overall_tokens_per_second": 30.82179111,
+        "peak_cuda_allocated_bytes": 2186921472,
+        "incremental_peak_cuda_bytes": 81921024
+      },
+      "speculative": {
+        "generated_tokens": 64,
+        "prefill_seconds": 0.053994658,
+        "decode_seconds": 10.11631501,
+        "total_seconds": 10.170309667,
+        "decode_tokens_per_second": 6.326414306,
+        "overall_tokens_per_second": 6.292827072,
+        "drafted_tokens": 250,
+        "accepted_draft_tokens": 0,
+        "acceptance_rate": 0.0,
+        "rejected_rounds": 64,
+        "rounds": 64,
+        "peak_cuda_allocated_bytes": 2272183808,
+        "incremental_peak_cuda_bytes": 167183360
+      }
+    },
+    {
+      "input_tokens": 512,
+      "requested_output_tokens": 64,
+      "token_exact_match": true,
+      "ordinary": {
+        "generated_tokens": 64,
+        "prefill_seconds": 0.156094167,
+        "decode_seconds": 2.010129934,
+        "total_seconds": 2.1662241,
+        "decode_tokens_per_second": 31.83873784,
+        "overall_tokens_per_second": 29.54449633,
+        "peak_cuda_allocated_bytes": 2433515008,
+        "incremental_peak_cuda_bytes": 328511488
+      },
+      "speculative": {
+        "generated_tokens": 64,
+        "prefill_seconds": 0.19648723,
+        "decode_seconds": 7.524813548,
+        "total_seconds": 7.721300778,
+        "decode_tokens_per_second": 8.505194128,
+        "overall_tokens_per_second": 8.28875883,
+        "drafted_tokens": 250,
+        "accepted_draft_tokens": 0,
+        "acceptance_rate": 0.0,
+        "rejected_rounds": 64,
+        "rounds": 64,
+        "peak_cuda_allocated_bytes": 2751546880,
+        "incremental_peak_cuda_bytes": 646543360
+      }
+    }
+  ]
+}

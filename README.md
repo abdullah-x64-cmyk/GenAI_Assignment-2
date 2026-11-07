@@ -218,7 +218,18 @@ python src/benchmark_speculative.py --config configs/qwen_lora.json --split vali
 The benchmark compares against cached ordinary greedy on the same validation
 prompt prefixes and checks exact generated token IDs. It records prefill,
 decode, total latency, throughput, draft acceptance, cache lengths, and CUDA
-peak/incremental allocation. The real model benchmark still needs to be run
-on a GPU after the project has been pulled into Colab; CPU-only toy tests
-verify acceptance, rejection correction, EOS, and cache alignment but are not
-performance evidence.
+peak/incremental allocation. A T4 run with the fine-tuned Qwen target, eager
+attention, float32, four draft tokens per round, and 64 generated tokens is
+saved in `results/speculative_benchmark_t4.json`. Both cases matched ordinary
+greedy token for token. The two-layer draft accepted 0 of 250 proposals in
+each case (0% acceptance), so speculative decoding was slower: for 128 input
+tokens, total latency was 10.170 s versus 2.076 s and total throughput was
+6.29 versus 30.82 tokens/s; for 512 input tokens, total latency was 7.721 s
+versus 2.166 s and total throughput was 8.29 versus 29.54 tokens/s. Peak CUDA
+allocation was 2166.92 versus 2085.61 MiB and 2624.08 versus 2320.78 MiB,
+respectively. This is an expected failure mode for a weak draft: the target
+must still generate every correction, while the draft adds serial forward
+passes and cache storage. The benchmark uses validation prompts only and is
+one hardware run. CPU toy tests verify acceptance, rejection correction, EOS,
+and cache alignment; the T4 token equality check provides model-level output
+correctness evidence, not a speedup claim.
