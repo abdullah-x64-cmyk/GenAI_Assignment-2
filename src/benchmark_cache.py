@@ -55,7 +55,13 @@ def main():
 
     config = json.loads(Path(args.config).read_text(encoding="utf-8"))
     tokenizer = AutoTokenizer.from_pretrained(config["model_name"])
-    model = AutoModelForCausalLM.from_pretrained(config["model_name"], torch_dtype="auto", device_map="auto")
+    # Use the same eager attention implementation for both paths. This avoids
+    # comparing distinct SDPA kernels (full query versus one-token query) and
+    # reduces numerical variation during the token-equivalence check.
+    model = AutoModelForCausalLM.from_pretrained(
+        config["model_name"], torch_dtype="auto", device_map="auto",
+        attn_implementation="eager",
+    )
     if args.mode == "finetuned":
         model = PeftModel.from_pretrained(model, f"{config['output_dir']}/best_adapter")
     model.eval()
@@ -116,6 +122,7 @@ def main():
         "model": config["model_name"], "mode": args.mode, "split_prompt_source": args.split,
         "device": str(device), "cuda_name": torch.cuda.get_device_name(device) if device.type == "cuda" else None,
         "dtype": str(next(model.parameters()).dtype),
+        "attention_implementation": "eager",
         "method": "cached: one prompt prefill, then one-token forward calls carrying past_key_values; reference: full-prefix forward at every output step",
         "records": records,
     }

@@ -103,6 +103,8 @@ and the full attention mask grows by one visible token with the KV cache. There
 are no padding positions in these benchmark prompts. Floating-point kernel
 ordering can change an argmax for nearly tied logits, so the benchmark records
 both exact-sequence match and token agreement.
+The benchmark fixes Transformers to eager attention for both cached and
+reference forwards so it compares the same attention implementation.
 
 Run in the same GPU environment used for fine-tuning, after restoring model and
 adapter artifacts:
