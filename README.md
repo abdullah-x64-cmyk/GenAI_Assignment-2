@@ -85,3 +85,40 @@ The public archive contains evaluation outputs and patient IDs in the split mani
 ## Research sources
 
 See `report/references.bib` and `report/task1.tex`. Sources include the TrialGPT paper, Transformer architecture, Qwen and SmolLM2 model cards/papers, LoRA, and FlashAttention. The report and `results/benchmark_summary.json` describe the observed validation and held-out results; the archive contains the detailed test logs and trained adapter.
+
+## Task 3: Explicit KV-cached autoregressive decoding
+
+`src/cache_decode.py` implements two deterministic greedy paths. `cached_greedy`
+prefills the unpadded prompt once, then feeds each newly generated token with
+the returned `past_key_values` on the next forward call. The key/value tensors
+therefore grow by one position per decode call. `uncached_greedy` is the
+reference: it appends each generated token to the prefix and reruns the model
+over the complete prefix with `use_cache=False`. Both paths share argmax token
+selection and EOS handling.
+
+For Qwen2.5, prompt positions use the model's zero-based rotary positions. The
+cached path explicitly supplies the next position as `prompt_length + step`;
+the model's causal mask prevents queries from attending to future positions,
+and the full attention mask grows by one visible token with the KV cache. There
+are no padding positions in these benchmark prompts. Floating-point kernel
+ordering can change an argmax for nearly tied logits, so the benchmark records
+both exact-sequence match and token agreement.
+
+Run in the same GPU environment used for fine-tuning, after restoring model and
+adapter artifacts:
+
+```bash
+python src/benchmark_cache.py --config configs/qwen_lora.json --split validation --mode finetuned --input-lengths 64,256,512 --output-lengths 16,32 --out results/cache_benchmark.json
+```
+
+The script checks actual cache sequence length after prefill and every
+incremental update, and reports those lengths alongside token agreement,
+prefill latency, decode latency, generated tokens per second, and total plus
+incremental peak CUDA allocation for both methods. Add
+`--require-exact-match` to make the run fail if any output token differs. Use
+the same device, dtype, model, adapter, and prompts for a fair comparison. A
+CPU run can check token agreement and control flow, but cannot supply CUDA peak
+memory and is not a substitute for the assignment's requested GPU comparison.
+No cache benchmark values are claimed until a GPU run is completed; Colab GPU
+access may be temporarily limited, in which case the same free workflow can be
+run in Kaggle or later in Colab.
