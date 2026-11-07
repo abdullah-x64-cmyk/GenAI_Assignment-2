@@ -1,0 +1,938 @@
+{
+  "source_archive": "task1_submission_artifacts.zip",
+  "split": "test",
+  "models": {
+    "base": {
+      "overall": {
+        "classification": {
+          "n": 206,
+          "accuracy": 0.0,
+          "macro_f1": 0.0,
+          "labels": [
+            "included",
+            "invalid or unstructured",
+            "not applicable",
+            "not enough information",
+            "not excluded",
+            "not included"
+          ],
+          "per_class": {
+            "included": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 27.0
+            },
+            "invalid or unstructured": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 0.0
+            },
+            "not applicable": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 15.0
+            },
+            "not enough information": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 66.0
+            },
+            "not excluded": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 91.0
+            },
+            "not included": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 7.0
+            },
+            "accuracy": 0.0,
+            "macro avg": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 206.0
+            },
+            "weighted avg": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 206.0
+            }
+          },
+          "confusion_matrix": [
+            [
+              0,
+              27,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              15,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              66,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              91,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "evidence": {
+          "precision": 0.04395604395604396,
+          "recall": 0.0425531914893617,
+          "f1": 0.043243243243243246,
+          "gold_evidence_empty_records": 145,
+          "predicted_evidence_empty_records": 135,
+          "both_empty_records": 95,
+          "gold_empty_predicted_nonempty_records": 50,
+          "gold_nonempty_predicted_empty_records": 40,
+          "empty_evidence_policy": "Micro exact-ID set counts: both-empty corpus gives precision/recall/F1=1; one-sided empty gives the affected metric 0."
+        }
+      },
+      "by_criterion_type": {
+        "inclusion": {
+          "classification": {
+            "n": 75,
+            "accuracy": 0.0,
+            "macro_f1": 0.0,
+            "labels": [
+              "included",
+              "invalid or unstructured",
+              "not applicable",
+              "not enough information",
+              "not included"
+            ],
+            "per_class": {
+              "included": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 27.0
+              },
+              "invalid or unstructured": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0.0
+              },
+              "not applicable": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 3.0
+              },
+              "not enough information": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 38.0
+              },
+              "not included": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 7.0
+              },
+              "accuracy": 0.0,
+              "macro avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 75.0
+              },
+              "weighted avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 75.0
+              }
+            },
+            "confusion_matrix": [
+              [
+                0,
+                27,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                3,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                38,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                7,
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "evidence": {
+            "precision": 0.07692307692307693,
+            "recall": 0.016129032258064516,
+            "f1": 0.026666666666666665,
+            "gold_evidence_empty_records": 30,
+            "predicted_evidence_empty_records": 62,
+            "both_empty_records": 27,
+            "gold_empty_predicted_nonempty_records": 3,
+            "gold_nonempty_predicted_empty_records": 35,
+            "empty_evidence_policy": "Micro exact-ID set counts: both-empty corpus gives precision/recall/F1=1; one-sided empty gives the affected metric 0."
+          }
+        },
+        "exclusion": {
+          "classification": {
+            "n": 131,
+            "accuracy": 0.0,
+            "macro_f1": 0.0,
+            "labels": [
+              "invalid or unstructured",
+              "not applicable",
+              "not enough information",
+              "not excluded"
+            ],
+            "per_class": {
+              "invalid or unstructured": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0.0
+              },
+              "not applicable": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 12.0
+              },
+              "not enough information": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 28.0
+              },
+              "not excluded": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 91.0
+              },
+              "accuracy": 0.0,
+              "macro avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 131.0
+              },
+              "weighted avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 131.0
+              }
+            },
+            "confusion_matrix": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                12,
+                0,
+                0,
+                0
+              ],
+              [
+                28,
+                0,
+                0,
+                0
+              ],
+              [
+                91,
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "evidence": {
+            "precision": 0.038461538461538464,
+            "recall": 0.09375,
+            "f1": 0.05454545454545455,
+            "gold_evidence_empty_records": 115,
+            "predicted_evidence_empty_records": 73,
+            "both_empty_records": 68,
+            "gold_empty_predicted_nonempty_records": 47,
+            "gold_nonempty_predicted_empty_records": 5,
+            "empty_evidence_policy": "Micro exact-ID set counts: both-empty corpus gives precision/recall/F1=1; one-sided empty gives the affected metric 0."
+          }
+        }
+      },
+      "error_analysis": {
+        "opposing_definitive_categories": {
+          "count": 0,
+          "representative_cases": []
+        },
+        "missing_information_overclaim": {
+          "count": 0,
+          "representative_cases": []
+        },
+        "other_category_mismatch": {
+          "count": 206,
+          "representative_cases": [
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "included",
+              "predicted_category": "invalid or unstructured",
+              "gold_evidence_ids": [
+                0
+              ],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "included",
+              "predicted_category": "invalid or unstructured",
+              "gold_evidence_ids": [
+                3
+              ],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not included",
+              "predicted_category": "invalid or unstructured",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not included",
+              "predicted_category": "invalid or unstructured",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not included",
+              "predicted_category": "invalid or unstructured",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            }
+          ]
+        },
+        "gold_not_enough_information": {
+          "count": 66,
+          "correctly_preserved": 0,
+          "predicted_as_definitive": 0,
+          "definitive_predictions_with_evidence": 0,
+          "definitive_predictions_without_evidence": 0,
+          "representative_failures": []
+        }
+      }
+    },
+    "finetuned": {
+      "overall": {
+        "classification": {
+          "n": 206,
+          "accuracy": 0.6699029126213593,
+          "macro_f1": 0.3980943661184007,
+          "labels": [
+            "included",
+            "not applicable",
+            "not enough information",
+            "not excluded",
+            "not included"
+          ],
+          "per_class": {
+            "included": {
+              "precision": 0.6538461538461539,
+              "recall": 0.6296296296296297,
+              "f1-score": 0.6415094339622641,
+              "support": 27.0
+            },
+            "not applicable": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 15.0
+            },
+            "not enough information": {
+              "precision": 0.62,
+              "recall": 0.4696969696969697,
+              "f1-score": 0.5344827586206896,
+              "support": 66.0
+            },
+            "not excluded": {
+              "precision": 0.6923076923076923,
+              "recall": 0.989010989010989,
+              "f1-score": 0.8144796380090498,
+              "support": 91.0
+            },
+            "not included": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1-score": 0.0,
+              "support": 7.0
+            },
+            "accuracy": 0.6699029126213593,
+            "macro avg": {
+              "precision": 0.3932307692307692,
+              "recall": 0.4176675176675177,
+              "f1-score": 0.3980943661184007,
+              "support": 206.0
+            },
+            "weighted avg": {
+              "precision": 0.5901643017176997,
+              "recall": 0.6699029126213593,
+              "f1-score": 0.6151177856542241,
+              "support": 206.0
+            }
+          },
+          "confusion_matrix": [
+            [
+              17,
+              0,
+              10,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              3,
+              12,
+              0
+            ],
+            [
+              7,
+              0,
+              31,
+              28,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              90,
+              0
+            ],
+            [
+              2,
+              0,
+              5,
+              0,
+              0
+            ]
+          ]
+        },
+        "evidence": {
+          "precision": 0.525,
+          "recall": 0.44680851063829785,
+          "f1": 0.48275862068965514,
+          "gold_evidence_empty_records": 145,
+          "predicted_evidence_empty_records": 145,
+          "both_empty_records": 128,
+          "gold_empty_predicted_nonempty_records": 17,
+          "gold_nonempty_predicted_empty_records": 17,
+          "empty_evidence_policy": "Micro exact-ID set counts: both-empty corpus gives precision/recall/F1=1; one-sided empty gives the affected metric 0."
+        }
+      },
+      "by_criterion_type": {
+        "inclusion": {
+          "classification": {
+            "n": 75,
+            "accuracy": 0.64,
+            "macro_f1": 0.33853827803079595,
+            "labels": [
+              "included",
+              "not applicable",
+              "not enough information",
+              "not included"
+            ],
+            "per_class": {
+              "included": {
+                "precision": 0.6538461538461539,
+                "recall": 0.6296296296296297,
+                "f1-score": 0.6415094339622641,
+                "support": 27.0
+              },
+              "not applicable": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 3.0
+              },
+              "not enough information": {
+                "precision": 0.6326530612244898,
+                "recall": 0.8157894736842105,
+                "f1-score": 0.7126436781609196,
+                "support": 38.0
+              },
+              "not included": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 7.0
+              },
+              "accuracy": 0.64,
+              "macro avg": {
+                "precision": 0.3216248037676609,
+                "recall": 0.36135477582846004,
+                "f1-score": 0.33853827803079595,
+                "support": 75.0
+              },
+              "weighted avg": {
+                "precision": 0.5559288330716902,
+                "recall": 0.64,
+                "f1-score": 0.592016193161281,
+                "support": 75.0
+              }
+            },
+            "confusion_matrix": [
+              [
+                17,
+                0,
+                10,
+                0
+              ],
+              [
+                0,
+                0,
+                3,
+                0
+              ],
+              [
+                7,
+                0,
+                31,
+                0
+              ],
+              [
+                2,
+                0,
+                5,
+                0
+              ]
+            ]
+          },
+          "evidence": {
+            "precision": 0.5428571428571428,
+            "recall": 0.6129032258064516,
+            "f1": 0.5757575757575757,
+            "gold_evidence_empty_records": 30,
+            "predicted_evidence_empty_records": 23,
+            "both_empty_records": 16,
+            "gold_empty_predicted_nonempty_records": 14,
+            "gold_nonempty_predicted_empty_records": 7,
+            "empty_evidence_policy": "Micro exact-ID set counts: both-empty corpus gives precision/recall/F1=1; one-sided empty gives the affected metric 0."
+          }
+        },
+        "exclusion": {
+          "classification": {
+            "n": 131,
+            "accuracy": 0.6870229007633588,
+            "macro_f1": 0.27149321266968324,
+            "labels": [
+              "not applicable",
+              "not enough information",
+              "not excluded"
+            ],
+            "per_class": {
+              "not applicable": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 12.0
+              },
+              "not enough information": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 28.0
+              },
+              "not excluded": {
+                "precision": 0.6923076923076923,
+                "recall": 0.989010989010989,
+                "f1-score": 0.8144796380090498,
+                "support": 91.0
+              },
+              "accuracy": 0.6870229007633588,
+              "macro avg": {
+                "precision": 0.23076923076923075,
+                "recall": 0.32967032967032966,
+                "f1-score": 0.27149321266968324,
+                "support": 131.0
+              },
+              "weighted avg": {
+                "precision": 0.48091603053435117,
+                "recall": 0.6870229007633588,
+                "f1-score": 0.5657835653345307,
+                "support": 131.0
+              }
+            },
+            "confusion_matrix": [
+              [
+                0,
+                0,
+                12
+              ],
+              [
+                0,
+                0,
+                28
+              ],
+              [
+                0,
+                1,
+                90
+              ]
+            ]
+          },
+          "evidence": {
+            "precision": 0.4,
+            "recall": 0.125,
+            "f1": 0.19047619047619047,
+            "gold_evidence_empty_records": 115,
+            "predicted_evidence_empty_records": 122,
+            "both_empty_records": 112,
+            "gold_empty_predicted_nonempty_records": 3,
+            "gold_nonempty_predicted_empty_records": 10,
+            "empty_evidence_policy": "Micro exact-ID set counts: both-empty corpus gives precision/recall/F1=1; one-sided empty gives the affected metric 0."
+          }
+        }
+      },
+      "error_analysis": {
+        "opposing_definitive_categories": {
+          "count": 2,
+          "representative_cases": [
+            {
+              "error_kind": "opposing_definitive_categories",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not included",
+              "predicted_category": "included",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [
+                0,
+                1
+              ],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "opposing_definitive_categories",
+              "patient_id": "sigir-201516",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not included",
+              "predicted_category": "included",
+              "gold_evidence_ids": [
+                0,
+                1
+              ],
+              "evidence_sentence_ids": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "evidence_text": []
+            }
+          ]
+        },
+        "missing_information_overclaim": {
+          "count": 35,
+          "representative_cases": [
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201410",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201410",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201411",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201417",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "included",
+              "gold_evidence_ids": [
+                3
+              ],
+              "evidence_sentence_ids": [
+                3
+              ],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201417",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            }
+          ]
+        },
+        "other_category_mismatch": {
+          "count": 31,
+          "representative_cases": [
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not included",
+              "predicted_category": "not enough information",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not included",
+              "predicted_category": "not enough information",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [
+                0
+              ],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not included",
+              "predicted_category": "not enough information",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not applicable",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "other_category_mismatch",
+              "patient_id": "sigir-201410",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "included",
+              "predicted_category": "not enough information",
+              "gold_evidence_ids": [
+                0
+              ],
+              "evidence_sentence_ids": [
+                0
+              ],
+              "evidence_text": []
+            }
+          ]
+        },
+        "gold_not_enough_information": {
+          "count": 66,
+          "correctly_preserved": 31,
+          "predicted_as_definitive": 35,
+          "definitive_predictions_with_evidence": 9,
+          "definitive_predictions_without_evidence": 26,
+          "representative_failures": [
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201410",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201410",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201411",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201417",
+              "criterion_type": "inclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "included",
+              "gold_evidence_ids": [
+                3
+              ],
+              "evidence_sentence_ids": [
+                3
+              ],
+              "evidence_text": []
+            },
+            {
+              "error_kind": "missing_information_overclaim",
+              "patient_id": "sigir-201417",
+              "criterion_type": "exclusion",
+              "criterion": null,
+              "gold_label": "not enough information",
+              "predicted_category": "not excluded",
+              "gold_evidence_ids": [],
+              "evidence_sentence_ids": [],
+              "evidence_text": []
+            }
+          ]
+        }
+      }
+    }
+  }
+}

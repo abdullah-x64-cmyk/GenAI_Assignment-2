@@ -1,6 +1,8 @@
 import json, re
 
-LABELS = ["included", "excluded", "not enough information", "not applicable"]
+# Preserve the benchmark's criterion-specific labels. Inclusions commonly use
+# included/not included; exclusions commonly use excluded/not excluded.
+LABELS = ["included", "not included", "excluded", "not excluded", "not enough information", "not applicable"]
 
 def parse_evidence(value):
     # The dataset can contain non-sentence identifiers (for example dotted

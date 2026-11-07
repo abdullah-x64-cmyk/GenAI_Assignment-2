@@ -1,6 +1,6 @@
-# TrialGPT Criterion Eligibility Fine-Tuning (Task 1)
+# TrialGPT Criterion Eligibility System (Tasks 1 and 2)
 
-This project implements the first assignment task using the required NLM TrialGPT Criterion Annotations dataset. It creates the fixed patient-grouped split, excludes all GPT-4 generated fields from model input, fine-tunes an open-weight decoder model, and evaluates the same validation/test records before and after fine-tuning.
+This project uses the required NLM TrialGPT Criterion Annotations dataset. It creates the fixed patient-grouped split, excludes all GPT-4 generated fields from model input, fine-tunes an open-weight decoder model, and provides criterion-level prediction, evidence extraction, and evaluation for inclusion and exclusion criteria.
 
 ## Chosen model and feasibility
 
@@ -37,6 +37,24 @@ Supervised objective: causal next-token cross-entropy on the structured target J
 
 Evaluation includes accuracy, macro-F1, per-class precision/recall/F1, and confusion matrices overall and separately for inclusion and exclusion criteria. Evidence metrics use exact sentence-ID sets. If the entire evaluated group has empty gold and predicted evidence, precision/recall/F1 are 1; if only one side is empty, the affected metric is 0. Test metrics must be generated only once after configuration is fixed. The checkpoint is selected by validation loss.
 
+## Task 2: Criterion-level eligibility and evidence
+
+`src/evaluate.py` returns one record per criterion with its criterion text and type, the predicted expert category, sentence IDs, verbatim text for IDs that match numbered note sentences, invalid/unmatched IDs, and a deterministic audit explanation. The explanation quotes only the cited note text; if no evidence is cited, it explicitly says that missing evidence does not prove eligibility or ineligibility. The model is asked to preserve categories such as `included`, `not included`, `excluded`, `not excluded`, `not enough information`, and `not applicable` as distinct outputs. Unsupported or type-incompatible categories are retained in metrics and flagged rather than silently rewritten.
+
+Run `python src/evaluate.py --config configs/qwen_lora.json --split validation --mode finetuned` to generate the enriched per-criterion output on validation. The evaluator stores overall and inclusion/exclusion metrics, per-class reports, confusion matrices, exact evidence metrics, and error cases in `outputs/evaluation/`. The final test split has already been evaluated; `src/analyze_saved_evaluations.py` re-aggregates its existing base and fine-tuned logs without rerunning model inference:
+
+```bash
+python src/analyze_saved_evaluations.py --archive results/task1_submission_artifacts.zip --split test --out results/task2_error_analysis.json
+```
+
+### Held-out Task 2 analysis
+
+The analysis uses the existing 206-criterion test logs (75 inclusion and 131 exclusion records); it does not tune or rerun the model on test data. The fine-tuned model achieved 0.640 inclusion accuracy / 0.339 macro-F1 and 0.687 exclusion accuracy / 0.271 macro-F1. Evidence F1 was 0.576 for inclusion and 0.190 for exclusion, indicating weaker evidence retrieval on exclusion criteria. Full per-class precision/recall/F1 and confusion matrices for both model modes are in [`results/task2_error_analysis.json`](results/task2_error_analysis.json).
+
+On the 66 gold `not enough information` records, the fine-tuned system preserved that category for 31 and made a definitive prediction for 35; notably, all 28 exclusion cases with that gold label were predicted `not excluded`. The model cited no evidence for 26 of those 28 cases. It also produced two opposing definitive inclusion errors (`not included` predicted as `included`), including patient `sigir-201410`, where no evidence was annotated but sentence IDs 0 and 1 were returned. `not applicable` had zero F1 (15 test cases), so the model did not reliably preserve that category in its predictions. These are errors from the model/gold comparison; they do not establish contradictions in the underlying medical record. Each per-case record and representative examples are included in the analysis JSON.
+
+The existing Task 1 prediction logs predate the richer output schema and therefore cannot provide extracted evidence text for those historical predictions. The current evaluator adds the criterion, verified evidence text, unmatched-ID flags, and evidence-grounded audit explanation to each newly generated record. The historical test predictions were re-aggregated only; no new test inference was run for this task.
+
 ## Measured results
 
 The fixed test split has 206 criteria from 8 held-out patients. Training ran for 3 epochs; its runtime was 622.75 seconds, final logged training loss was 0.1860, and validation loss was 0.1209. Metrics observed in Colab:
@@ -53,6 +71,14 @@ Reported truncation fraction was 0.000 for both held-out test runs. The base mod
 ### Exporting submission artifacts from Colab
 
 Evaluation saves complete logs under `outputs/evaluation/` (predictions, class reports, confusion matrices, truncation flags, and latencies); training saves the adapter at `outputs/qwen2.5-0.5b-lora/best_adapter/` and training metrics at `outputs/qwen2.5-0.5b-lora/train_metrics.json`. The Colab artifacts are in [`results/task1_submission_artifacts.zip`](results/task1_submission_artifacts.zip), which includes the adapter, fine-tuned test predictions, aggregate base-model metrics, training metrics, truncation records, and split manifest. Unstructured base generations are omitted from the public bundle because they can reproduce patient-note text. The archive is available from GitHub at [Download the trained adapter and benchmark artifacts](https://github.com/abdullah-x64-cmyk/GenAI_Assignment-2/raw/refs/heads/main/results/task1_submission_artifacts.zip).
+
+To export again from Colab, first sanitize the raw logs and then download the bundle from `/content/task1_project`:
+
+```python
+!python src/package_submission_artifacts.py --root /content/task1_project --out /content/task1_submission_artifacts.zip
+from google.colab import files
+files.download('/content/task1_submission_artifacts.zip')
+```
 
 The public archive contains evaluation outputs and patient IDs in the split manifest, but no patient note text. The application remains a research screening prototype, not a clinical enrollment decision tool.
 
