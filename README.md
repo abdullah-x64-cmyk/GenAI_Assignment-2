@@ -121,6 +121,11 @@ incremental peak CUDA allocation for both methods. Add
 the same device, dtype, model, adapter, and prompts for a fair comparison. A
 CPU run can check token agreement and control flow, but cannot supply CUDA peak
 memory and is not a substitute for the assignment's requested GPU comparison.
-No cache benchmark values are claimed until a GPU run is completed; Colab GPU
-access may be temporarily limited, in which case the same free workflow can be
-run in Kaggle or later in Colab.
+Preliminary Tesla T4 measurements from the fine-tuned Qwen2.5-0.5B model in
+bfloat16 are recorded in `results/cache_benchmark_preliminary.csv`. This run
+reported `attention_implementation=None`, so it is not the planned shared
+eager-backend comparison. Exact token agreement held for both 512-token prompts
+but not for the 64- or 256-token prompts; cached decoding used less peak memory
+in all six cases. These results are diagnostic and do not establish greedy
+token equivalence. A same-backend rerun and investigation of the first
+divergent token remain necessary before Task 3 can be considered complete.
