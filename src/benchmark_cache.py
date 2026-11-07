@@ -49,6 +49,8 @@ def main():
     parser.add_argument("--output-lengths", default="16,32")
     parser.add_argument("--out", default="results/cache_benchmark.json")
     parser.add_argument("--include-token-ids", action="store_true")
+    parser.add_argument("--dtype", choices=["float32", "float16", "bfloat16", "auto"],
+                        default="float32", help="float32 reduces precision-induced argmax drift")
     parser.add_argument("--require-exact-match", action="store_true",
                         help="exit with an error if cached and reference greedy tokens differ")
     args = parser.parse_args()
@@ -58,16 +60,18 @@ def main():
     # Use the same eager attention implementation for both paths. This avoids
     # comparing distinct SDPA kernels (full query versus one-token query) and
     # reduces numerical variation during the token-equivalence check.
+    dtype = {"float32": torch.float32, "float16": torch.float16,
+             "bfloat16": torch.bfloat16, "auto": "auto"}[args.dtype]
     model = AutoModelForCausalLM.from_pretrained(
-        config["model_name"], torch_dtype="auto", device_map="auto",
-        attn_implementation="eager",
+        config["model_name"], torch_dtype=dtype, attn_implementation="eager",
     )
     if args.mode == "finetuned":
         model = PeftModel.from_pretrained(model, f"{config['output_dir']}/best_adapter")
     model.eval()
     # This benchmark intentionally uses one device so peak CUDA allocation and
     # cache placement are directly comparable between decoding paths.
-    device = next(model.parameters()).device
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model.to(device)
     if device.type == "meta":
         raise RuntimeError("model parameters are on meta; load the model on a concrete device")
     if torch.cuda.is_available():
@@ -89,6 +93,11 @@ def main():
         ids = base_ids.repeat((input_length + len(base_ids) - 1) // len(base_ids))[:input_length]
         ids = ids.unsqueeze(0).to(device)
         for output_length in output_lengths:
+            # Warm both execution shapes once so CUDA context/kernel startup is
+            # not charged to the first timed prefill.
+            warmup_tokens = min(output_length, 4)
+            cached_greedy(model, ids, warmup_tokens, tokenizer.eos_token_id)
+            uncached_greedy(model, ids, warmup_tokens, tokenizer.eos_token_id)
             cached = run_once(cached_greedy, model, ids, output_length, tokenizer.eos_token_id, device)
             uncached = run_once(uncached_greedy, model, ids, output_length, tokenizer.eos_token_id, device)
             match_len = min(len(cached["generated_token_ids"]), len(uncached["generated_token_ids"]))
@@ -122,6 +131,7 @@ def main():
         "model": config["model_name"], "mode": args.mode, "split_prompt_source": args.split,
         "device": str(device), "cuda_name": torch.cuda.get_device_name(device) if device.type == "cuda" else None,
         "dtype": str(next(model.parameters()).dtype),
+        "warmup_tokens_per_path": min(4, min(output_lengths)) if output_lengths else 0,
         "attention_implementation": "eager",
         "method": "cached: one prompt prefill, then one-token forward calls carrying past_key_values; reference: full-prefix forward at every output step",
         "records": records,

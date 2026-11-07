@@ -110,7 +110,7 @@ Run in the same GPU environment used for fine-tuning, after restoring model and
 adapter artifacts:
 
 ```bash
-python src/benchmark_cache.py --config configs/qwen_lora.json --split validation --mode finetuned --input-lengths 64,256,512 --output-lengths 16,32 --out results/cache_benchmark.json
+python src/benchmark_cache.py --config configs/qwen_lora.json --split validation --mode finetuned --dtype float32 --input-lengths 64,256,512 --output-lengths 16,32 --out results/cache_benchmark.json
 ```
 
 The script checks actual cache sequence length after prefill and every
@@ -121,7 +121,9 @@ incremental peak CUDA allocation for both methods. Add
 the same device, dtype, model, adapter, and prompts for a fair comparison. A
 CPU run can check token agreement and control flow, but cannot supply CUDA peak
 memory and is not a substitute for the assignment's requested GPU comparison.
-Preliminary Tesla T4 measurements from the fine-tuned Qwen2.5-0.5B model in
+The benchmark now explicitly uses eager attention, defaults to float32 to limit
+precision-induced greedy drift, loads the model onto a single device, and warms
+each path before timing. Preliminary Tesla T4 measurements from the fine-tuned Qwen2.5-0.5B model in
 bfloat16 are recorded in `results/cache_benchmark_preliminary.csv`. This run
 reported `attention_implementation=None`, so it is not the planned shared
 eager-backend comparison. Exact token agreement held for both 512-token prompts
