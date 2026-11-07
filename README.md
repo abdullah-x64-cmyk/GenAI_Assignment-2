@@ -194,3 +194,31 @@ intermediate score storage. It uses Python loops and multiple ordinary PyTorch
 operators per tile, so it cannot fuse loads, softmax updates, and value
 accumulation into one GPU kernel. A hardware-optimized fused attention kernel
 can therefore be faster despite doing the same stable computation.
+
+## Task 5: Greedy speculative decoding
+
+`src/speculative_decode.py` implements candidate drafting, block verification
+by the target, greedy-prefix acceptance, rejection correction, and cache
+rollback/resynchronization. The draft is constructed from the target's merged
+Qwen2.5-0.5B checkpoint by retaining its first two decoder layers and sharing
+its embeddings, final norm, and output head. It uses the target tokenizer and
+vocabulary exactly, and inherits the target's fine-tuned weights in the
+retained layers. This gives a smaller draft without token-ID conversion; it
+may still have low acceptance because it omits most target layers. If every
+draft token matches, the target's final verification logits provide one
+additional greedy token.
+
+Run the toy correctness cases and the real benchmark as follows:
+
+```bash
+python -m unittest tests.test_speculative_decode -v
+python src/benchmark_speculative.py --config configs/qwen_lora.json --split validation --mode finetuned --lengths 128,512 --max-new-tokens 64 --draft-tokens 4 --draft-layers 2 --out results/speculative_benchmark.json
+```
+
+The benchmark compares against cached ordinary greedy on the same validation
+prompt prefixes and checks exact generated token IDs. It records prefill,
+decode, total latency, throughput, draft acceptance, cache lengths, and CUDA
+peak/incremental allocation. The real model benchmark still needs to be run
+on a GPU after the project has been pulled into Colab; CPU-only toy tests
+verify acceptance, rejection correction, EOS, and cache alignment but are not
+performance evidence.
