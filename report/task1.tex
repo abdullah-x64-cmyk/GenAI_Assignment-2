@@ -53,5 +53,26 @@ We implemented the greedy decoding loop in \texttt{src/cache\_decode.py} rather 
 
 Qwen2.5 uses rotary positional embeddings. Prompt positions follow the model's zero-based positions; cached decoding explicitly assigns each new token position $L+j$, where $L$ is prompt length and $j$ is its zero-based generated-token index. The attention mask grows by one visible position per step, while the model's causal mask disallows attending to future positions. Benchmark prompts are unpadded, so no padding offset is needed. The key/value cache grows linearly with generated sequence length. Differences in floating-point kernel order can alter an argmax when top logits are nearly tied, so the benchmark records per-token agreement and exact-sequence agreement.
 
-The reproducible comparison is implemented in \texttt{src/benchmark\_cache.py}. It verifies actual cache sequence length after prefill and each incremental update, and measures prefill latency, decode latency, tokens per second, and peak CUDA allocation for 64/256/512-token prompts and 16/32-token outputs. The benchmark now explicitly selects eager attention for both paths, defaults to float32 to limit precision-induced greedy drift, loads onto one device, and warms each path before timing. Preliminary Tesla T4 measurements for the fine-tuned Qwen2.5-0.5B model in bfloat16 are listed in \texttt{results/cache\_benchmark\_preliminary.csv}. The recorded run reports \texttt{attention\_implementation=None}, so it does not satisfy the shared eager-backend comparison. Exact token agreement held for the two 512-token cases, but not for the 64- or 256-token cases. Cached decoding used less peak memory in all six cases, although it was slower for the 64-token prompt with a 32-token output. These observations are diagnostic and do not establish greedy token equivalence. The updated benchmark must complete on the T4 and the first divergent token must be inspected before reporting Task 3 as complete.
+The reproducible comparison is implemented in \texttt{src/benchmark\_cache.py}. It verifies actual cache sequence length after prefill and every incremental update, and measures prefill latency, decode latency, tokens per second, and peak CUDA allocation for 64/256/512-token prompts and 16/32-token outputs. We measured the fine-tuned Qwen2.5-0.5B model on a Tesla T4 with float32 computation, eager attention on both paths, and four warmup tokens per path. The complete measurements are archived in \texttt{results/cache\_benchmark\_final.json}; Table~\ref{tab:cache-final} summarizes them. All six tested cached and uncached greedy sequences matched token for token. The earlier exploratory bfloat16 run with unspecified attention backend diverged on the 64- and 256-token prompts. The successful rerun changed backend and dtype together, so it establishes exact agreement under the final settings but cannot attribute the earlier mismatch to only one cause.
+
+\begin{table*}[t]
+\centering
+\caption{Tesla T4 KV-cache benchmark. Prefill/decode are seconds, throughput is generated tokens/s, and peak allocation includes the model/runtime (GiB). Paired values are cached/reference.}
+\label{tab:cache-final}
+\small
+\begin{tabular}{rrccccc}
+\hline
+Prompt & Output & Exact match & Prefill & Decode & Throughput & Peak memory \\
+\hline
+64 & 16 & Yes & 0.055 / 0.046 & 0.662 / 0.746 & 24.18 / 21.46 & 1.89 / 1.94 \\
+64 & 32 & Yes & 0.050 / 0.066 & 1.385 / 1.523 & 23.10 / 21.01 & 1.89 / 1.96 \\
+256 & 16 & Yes & 0.071 / 0.066 & 0.258 / 0.581 & 27.14 / 12.05 & 2.01 / 2.15 \\
+256 & 32 & Yes & 0.074 / 0.067 & 0.260 / 0.585 & 26.93 / 11.96 & 2.01 / 2.15 \\
+512 & 16 & Yes & 0.154 / 0.147 & 0.880 / 2.637 & 18.19 / 6.07 & 2.16 / 2.45 \\
+512 & 32 & Yes & 0.151 / 0.149 & 1.372 / 5.495 & 23.33 / 5.82 & 2.16 / 2.47 \\
+\hline
+\end{tabular}
+\end{table*}
+
+Table~\ref{tab:cache-final} shows lower decode latency and peak allocation for cached decoding in every measured case. The throughput advantage is clearest for longer prompts: cached throughput is approximately 3.0--4.0 times the reference at 512 tokens. Short prompts show a smaller gain. These results cover one validation prompt per requested length on one T4, and therefore characterize this run rather than all inputs or GPU types. Peak allocation includes the resident model and runtime; incremental peak allocation is also retained in the JSON log.
 \bibliographystyle{IEEEtran}\bibliography{references}\end{document}

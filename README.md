@@ -121,13 +121,29 @@ incremental peak CUDA allocation for both methods. Add
 the same device, dtype, model, adapter, and prompts for a fair comparison. A
 CPU run can check token agreement and control flow, but cannot supply CUDA peak
 memory and is not a substitute for the assignment's requested GPU comparison.
-The benchmark now explicitly uses eager attention, defaults to float32 to limit
-precision-induced greedy drift, loads the model onto a single device, and warms
-each path before timing. Preliminary Tesla T4 measurements from the fine-tuned Qwen2.5-0.5B model in
-bfloat16 are recorded in `results/cache_benchmark_preliminary.csv`. This run
-reported `attention_implementation=None`, so it is not the planned shared
-eager-backend comparison. Exact token agreement held for both 512-token prompts
-but not for the 64- or 256-token prompts; cached decoding used less peak memory
-in all six cases. These results are diagnostic and do not establish greedy
-token equivalence. A same-backend rerun and investigation of the first
-divergent token remain necessary before Task 3 can be considered complete.
+The final measured run is saved in `results/cache_benchmark_final.json`. It used
+the fine-tuned Qwen2.5-0.5B adapter, a Tesla T4, float32, eager attention for
+both paths, and four warmup tokens per path. All six cached and uncached output
+sequences matched exactly. The earlier bfloat16/default-backend run diverged
+for 64- and 256-token prompts; changing both the backend to explicit eager and
+the computation to float32 removed the observed divergences. Since both
+settings changed together, this comparison does not isolate which change was
+responsible. The final measurements (times in seconds, throughput in generated
+tokens/s, peak memory in GiB) are:
+
+| Prompt / requested output | Exact match | Prefill cached / reference | Decode cached / reference | Throughput cached / reference | Peak memory cached / reference |
+|---:|:---:|---:|---:|---:|---:|
+| 64 / 16 | Yes | 0.055 / 0.046 | 0.662 / 0.746 | 24.18 / 21.46 | 1.89 / 1.94 |
+| 64 / 32 | Yes | 0.050 / 0.066 | 1.385 / 1.523 | 23.10 / 21.01 | 1.89 / 1.96 |
+| 256 / 16 | Yes | 0.071 / 0.066 | 0.258 / 0.581 | 27.14 / 12.05 | 2.01 / 2.15 |
+| 256 / 32 | Yes | 0.074 / 0.067 | 0.260 / 0.585 | 26.93 / 11.96 | 2.01 / 2.15 |
+| 512 / 16 | Yes | 0.154 / 0.147 | 0.880 / 2.637 | 18.19 / 6.07 | 2.16 / 2.45 |
+| 512 / 32 | Yes | 0.151 / 0.149 | 1.372 / 5.495 | 23.33 / 5.82 | 2.16 / 2.47 |
+
+Caching lowered measured decode time and peak allocation in all six cases.
+The speed advantage grew with prompt length: for 512-token prompts, cached
+throughput was about 3.0--4.0 times higher. The benchmark is small and uses a
+single validation prompt per requested length, so these timings describe this
+T4 run rather than a general hardware guarantee. The old exploratory results
+remain in `results/cache_benchmark_preliminary.csv` for provenance; use the
+final JSON log for Task 3 conclusions.

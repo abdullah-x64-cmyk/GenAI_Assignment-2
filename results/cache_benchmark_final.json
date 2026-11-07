@@ -1,0 +1,26 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "mode": "finetuned",
+  "split_prompt_source": "validation",
+  "device": "cuda:0",
+  "cuda_name": "Tesla T4",
+  "dtype": "torch.float32",
+  "attention_implementation": "eager",
+  "warmup_tokens_per_path": 4,
+  "benchmark_command": "USE_TF=0 USE_FLAX=0 python src/benchmark_cache.py --config configs/qwen_lora.json --split validation --mode finetuned --dtype float32 --input-lengths 64,256,512 --output-lengths 16,32 --out results/cache_benchmark_final.json --include-token-ids",
+  "measurement_units": {
+    "prefill_seconds": "seconds",
+    "decode_seconds": "seconds",
+    "tokens_per_second": "generated tokens / second",
+    "peak_memory_bytes": "bytes; peak CUDA allocation including model and runtime",
+    "peak_incremental_memory_bytes": "bytes; peak allocation above the pre-run baseline"
+  },
+  "records": [
+    {"input_length":64,"requested_output_length":16,"token_exact_match":true,"token_agreement_fraction":1.0,"mismatch_token_indices":[],"cache":{"prefill_seconds":0.055103,"decode_seconds":0.661761,"tokens_per_second":24.177921,"peak_memory_bytes":2031755264,"peak_incremental_memory_bytes":42057216},"no_cache_reference":{"prefill_seconds":0.046212,"decode_seconds":0.745675,"tokens_per_second":21.457064,"peak_memory_bytes":2086452736,"peak_incremental_memory_bytes":96754688}},
+    {"input_length":64,"requested_output_length":32,"token_exact_match":true,"token_agreement_fraction":1.0,"mismatch_token_indices":[],"cache":{"prefill_seconds":0.049965,"decode_seconds":1.385348,"tokens_per_second":23.098891,"peak_memory_bytes":2031755264,"peak_incremental_memory_bytes":42057216},"no_cache_reference":{"prefill_seconds":0.066168,"decode_seconds":1.523035,"tokens_per_second":21.010676,"peak_memory_bytes":2105889280,"peak_incremental_memory_bytes":116191232}},
+    {"input_length":256,"requested_output_length":16,"token_exact_match":true,"token_agreement_fraction":1.0,"mismatch_token_indices":[],"cache":{"prefill_seconds":0.070595,"decode_seconds":0.257948,"tokens_per_second":27.137251,"peak_memory_bytes":2153490944,"peak_incremental_memory_bytes":163791360},"no_cache_reference":{"prefill_seconds":0.066056,"decode_seconds":0.580891,"tokens_per_second":12.050459,"peak_memory_bytes":2309411328,"peak_incremental_memory_bytes":319711744}},
+    {"input_length":256,"requested_output_length":32,"token_exact_match":true,"token_agreement_fraction":1.0,"mismatch_token_indices":[],"cache":{"prefill_seconds":0.074052,"decode_seconds":0.259911,"tokens_per_second":26.932262,"peak_memory_bytes":2153490944,"peak_incremental_memory_bytes":163791360},"no_cache_reference":{"prefill_seconds":0.067067,"decode_seconds":0.585484,"tokens_per_second":11.955913,"peak_memory_bytes":2309411328,"peak_incremental_memory_bytes":319711744}},
+    {"input_length":512,"requested_output_length":16,"token_exact_match":true,"token_agreement_fraction":1.0,"mismatch_token_indices":[],"cache":{"prefill_seconds":0.153802,"decode_seconds":0.879666,"tokens_per_second":18.188717,"peak_memory_bytes":2317233664,"peak_incremental_memory_bytes":327532032},"no_cache_reference":{"prefill_seconds":0.146848,"decode_seconds":2.637220,"tokens_per_second":6.066995,"peak_memory_bytes":2632137728,"peak_incremental_memory_bytes":642436096}},
+    {"input_length":512,"requested_output_length":32,"token_exact_match":true,"token_agreement_fraction":1.0,"mismatch_token_indices":[],"cache":{"prefill_seconds":0.150687,"decode_seconds":1.371784,"tokens_per_second":23.327287,"peak_memory_bytes":2317233664,"peak_incremental_memory_bytes":327532032},"no_cache_reference":{"prefill_seconds":0.148668,"decode_seconds":5.495012,"tokens_per_second":5.823463,"peak_memory_bytes":2651059712,"peak_incremental_memory_bytes":661358080}}
+  ]
+}
