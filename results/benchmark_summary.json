@@ -1,0 +1,69 @@
+{
+  "source": "Google Colab notebook output, observed 2026-11-07",
+  "dataset": "ncbi/TrialGPT-Criterion-Annotations",
+  "split": {
+    "seed": 42,
+    "patient_grouped": true,
+    "train_patients": 37,
+    "validation_patients": 8,
+    "test_patients": 8,
+    "test_rows": 206
+  },
+  "training": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "method": "LoRA",
+    "epochs": 3,
+    "runtime_seconds": 622.7452,
+    "train_loss": 0.1859762480384425,
+    "validation_loss": 0.12091247737407684,
+    "gpu": "Tesla T4"
+  },
+  "metrics": {
+    "validation_base": {
+      "n": 206,
+      "accuracy": 0.0,
+      "macro_f1": 0.0,
+      "evidence_micro_precision": 0.02564102564102564,
+      "evidence_micro_recall": 0.017391304347826087,
+      "evidence_micro_f1": 0.02072538860103627,
+      "truncated_fraction": 0.0,
+      "mean_generation_seconds": 4.2715659698786625
+    },
+    "validation_finetuned": {
+      "n": 206,
+      "accuracy": 0.7184466019417476,
+      "macro_f1": 0.35431489026994645,
+      "evidence_micro_precision": 0.47959183673469385,
+      "evidence_micro_recall": 0.40869565217391307,
+      "evidence_micro_f1": 0.4413145539906103,
+      "truncated_fraction": 0.0,
+      "mean_generation_seconds": 1.0308362415436747
+    },
+    "test_base": {
+      "n": 206,
+      "accuracy": 0.0,
+      "macro_f1": 0.0,
+      "evidence_micro_precision": 0.04395604395604396,
+      "evidence_micro_recall": 0.0425531914893617,
+      "evidence_micro_f1": 0.043243243243243246,
+      "truncated_fraction": 0.0,
+      "mean_generation_seconds": 3.593689646781566
+    },
+    "test_finetuned": {
+      "n": 206,
+      "accuracy": 0.6699029126213593,
+      "macro_f1": 0.3980943661184007,
+      "evidence_micro_precision": 0.525,
+      "evidence_micro_recall": 0.44680851063829785,
+      "evidence_micro_f1": 0.48275862068965514,
+      "truncated_fraction": 0.0,
+      "mean_generation_seconds": 0.9836355728349561
+    }
+  },
+  "interpretation": "Base-model generations often did not follow the required JSON schema, producing zero label accuracy and macro-F1. Treat the baseline as an output-schema failure and report this caveat alongside the numerical comparison.",
+  "artifact_status": {
+    "full_prediction_logs": "Downloaded locally in results/task1_submission_artifacts.zip (outputs/evaluation/test_base.json and test_finetuned.json).",
+    "adapter": "Downloaded locally in results/task1_submission_artifacts.zip at outputs/qwen2.5-0.5b-lora/best_adapter/.",
+    "public_download_url": "https://github.com/abdullah-x64-cmyk/GenAI_Assignment-2/raw/refs/heads/main/results/task1_submission_artifacts.zip"
+  }
+}

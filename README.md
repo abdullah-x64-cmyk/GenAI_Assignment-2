@@ -1,0 +1,61 @@
+# TrialGPT Criterion Eligibility Fine-Tuning (Task 1)
+
+This project implements the first assignment task using the required NLM TrialGPT Criterion Annotations dataset. It creates the fixed patient-grouped split, excludes all GPT-4 generated fields from model input, fine-tunes an open-weight decoder model, and evaluates the same validation/test records before and after fine-tuning.
+
+## Chosen model and feasibility
+
+Primary model: `Qwen/Qwen2.5-0.5B-Instruct` (0.49B parameters, decoder-only causal Transformer, Apache-2.0, Qwen2 tokenizer, model-card context up to 32,768 tokens). FP16/BF16 weights require about 1 GB, while 4-bit weights require roughly 0.3–0.5 GB before runtime/cache overhead. LoRA training with sequence length 2048, microbatch 1, gradient accumulation 8, and gradient checkpointing is practical on a free 8–16 GB GPU; CPU training is technically possible but slow. Training and evaluation were run in Google Colab on a Tesla T4 GPU. The adapter, training history, split manifest, truncation records, and held-out base/fine-tuned prediction logs have been downloaded to `results/task1_submission_artifacts.zip`.
+
+Candidate: `HuggingFaceTB/SmolLM2-360M-Instruct` (0.36B parameters, decoder-only Llama-style causal Transformer, Apache-2.0, 8K context per model card). Its smaller weights reduce memory, but Qwen's longer context and stronger multilingual/instruction-tuning profile make Qwen preferable for patient-note conditioning. Both have compatible open-weight causal-generation architectures. Exact model metadata and license should be rechecked at download time.
+
+## Reproduce
+
+Use Python 3.10–3.12 and a free Kaggle/Colab GPU (or local CUDA). Install `requirements.txt`; then:
+
+```bash
+python src/prepare_data.py --out data/processed
+python src/train.py --config configs/qwen_lora.json
+python src/evaluate.py --config configs/qwen_lora.json --split validation
+python src/evaluate.py --config configs/qwen_lora.json --split test
+```
+
+Run the final test evaluation only after selecting hyperparameters from validation. Artifacts go to `outputs/`; the current adapter and held-out logs are in the linked archive. The standalone split manifest is `results/split_manifest.json`.
+
+## Data and leakage controls
+
+The source is `ncbi/TrialGPT-Criterion-Annotations` from Hugging Face. `prepare_data.py` sorts unique patient IDs, shuffles with `numpy.random.default_rng(42)`, and allocates 37/8/8 patients. It saves patient IDs and row counts and asserts disjoint groups. Inputs use only `note`, `criterion_type`, and `criterion_text`; targets use `expert_eligibility` and `expert_sentences`. The columns `gpt4_explanation`, `gpt4_sentences`, `gpt4_eligibility`, and `explanation_correctness` are explicitly excluded.
+
+Patient notes already contain numbered sentences (for example `0. ... 1. ...`). The output must be JSON with `eligibility` in the source expert label vocabulary and `evidence_sentence_ids` as integer IDs drawn from that note. Empty evidence is allowed. Evidence IDs are learned as target text; invalid IDs are counted in evaluation.
+
+## Truncation
+
+Tokenization uses the model's native tokenizer and truncates inputs to 2048 tokens by default, retaining the beginning of the concatenated prompt. This can remove later clinical evidence; the script records tokenized input length, truncation flag, and source note length per example. For the report, include the fraction truncated and inspect those cases. Do not silently claim evidence completeness for truncated notes. Increase `max_length` if free GPU memory permits.
+
+## Experimental design
+
+Supervised objective: causal next-token cross-entropy on the structured target JSON only; prompt tokens receive label `-100`. LoRA rank 8, alpha 16, dropout 0.05, target modules `q_proj`, `k_proj`, `v_proj`, `o_proj`; AdamW learning rate 2e-4, 3 epochs, effective batch 8, warmup ratio 0.05, seed 42. Save the best checkpoint by validation loss. Greedy decoding (`do_sample=False`, temperature omitted) uses the same prompt/template and max 128 new tokens for base and tuned models.
+
+Evaluation includes accuracy, macro-F1, per-class precision/recall/F1, and confusion matrices overall and separately for inclusion and exclusion criteria. Evidence metrics use exact sentence-ID sets. If the entire evaluated group has empty gold and predicted evidence, precision/recall/F1 are 1; if only one side is empty, the affected metric is 0. Test metrics must be generated only once after configuration is fixed. The checkpoint is selected by validation loss.
+
+## Measured results
+
+The fixed test split has 206 criteria from 8 held-out patients. Training ran for 3 epochs; its runtime was 622.75 seconds, final logged training loss was 0.1860, and validation loss was 0.1209. Metrics observed in Colab:
+
+| Split / model | Accuracy | Macro-F1 | Evidence micro-F1 | Mean generation time |
+|---|---:|---:|---:|---:|
+| Validation, base | 0.000 | 0.000 | 0.0207 | 4.272 s/criterion |
+| Validation, LoRA | 0.718 | 0.354 | 0.441 | 1.031 s/criterion |
+| Test, base | 0.000 | 0.000 | 0.0432 | 3.594 s/criterion |
+| Test, LoRA | 0.670 | 0.398 | 0.483 | 0.984 s/criterion |
+
+Reported truncation fraction was 0.000 for both held-out test runs. The base model often emitted free-form or dictionary-like text rather than the requested JSON, so the evaluator assigned zero label accuracy and macro-F1. This baseline is primarily an output-schema failure and must be discussed with the scores. Test data was not used for tuning. These are screening research results, not a clinical enrollment decision.
+
+### Exporting submission artifacts from Colab
+
+Evaluation saves complete logs under `outputs/evaluation/` (predictions, class reports, confusion matrices, truncation flags, and latencies); training saves the adapter at `outputs/qwen2.5-0.5b-lora/best_adapter/` and training metrics at `outputs/qwen2.5-0.5b-lora/train_metrics.json`. The Colab artifacts are in [`results/task1_submission_artifacts.zip`](results/task1_submission_artifacts.zip), which includes the adapter, fine-tuned test predictions, aggregate base-model metrics, training metrics, truncation records, and split manifest. Unstructured base generations are omitted from the public bundle because they can reproduce patient-note text. The archive is available from GitHub at [Download the trained adapter and benchmark artifacts](https://github.com/abdullah-x64-cmyk/GenAI_Assignment-2/raw/refs/heads/main/results/task1_submission_artifacts.zip).
+
+The public archive contains evaluation outputs and patient IDs in the split manifest, but no patient note text. The application remains a research screening prototype, not a clinical enrollment decision tool.
+
+## Research sources
+
+See `report/references.bib` and `report/task1.tex`. Sources include the TrialGPT paper, Transformer architecture, Qwen and SmolLM2 model cards/papers, LoRA, and FlashAttention. The report and `results/benchmark_summary.json` describe the observed validation and held-out results; the archive contains the detailed test logs and trained adapter.

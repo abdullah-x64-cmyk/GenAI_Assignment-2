@@ -1,0 +1,9 @@
+torch>=2.2
+transformers>=4.45,<4.58
+datasets>=3.0
+peft>=0.13
+accelerate>=1.0
+scikit-learn>=1.5
+numpy>=1.26
+matplotlib>=3.8
+safetensors>=0.4
