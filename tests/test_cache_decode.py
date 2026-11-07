@@ -14,13 +14,14 @@ class TinyCausalModel:
     def __init__(self):
         self.calls = []
 
-    def __call__(self, input_ids, attention_mask=None, position_ids=None,
+    def __call__(self, input_ids, attention_mask=None, position_ids=None, cache_position=None,
                  past_key_values=None, use_cache=False, return_dict=True):
         self.calls.append({
             "input_length": input_ids.shape[-1],
             "past_length": 0 if past_key_values is None else past_key_values.shape[-1],
             "use_cache": use_cache,
             "position_ids": position_ids,
+            "cache_position": cache_position,
             "mask_length": None if attention_mask is None else attention_mask.shape[-1],
         })
         sequence = input_ids if past_key_values is None else torch.cat([past_key_values, input_ids], dim=-1)
@@ -47,6 +48,7 @@ class CacheDecodeTests(unittest.TestCase):
         self.assertEqual([call["past_length"] for call in model.calls], [0, 4, 5, 6])
         self.assertEqual([call["mask_length"] for call in model.calls], [4, 5, 6, 7])
         self.assertEqual([call["position_ids"].item() for call in model.calls[1:]], [4, 5, 6])
+        self.assertEqual([call["cache_position"].item() for call in model.calls[1:]], [4, 5, 6])
 
 
 if __name__ == "__main__":

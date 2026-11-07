@@ -91,8 +91,10 @@ def cached_greedy(model: Any, input_ids: torch.Tensor, max_new_tokens: int,
                 [attention_mask, torch.ones((1, 1), device=device, dtype=attention_mask.dtype)], dim=-1
             )
             position_ids = torch.tensor([[input_ids.shape[-1] + step]], device=device, dtype=torch.long)
+            cache_position = torch.tensor([input_ids.shape[-1] + step], device=device, dtype=torch.long)
             output = model(input_ids=next_token, attention_mask=attention_mask,
-                           position_ids=position_ids, past_key_values=past_key_values,
+                           position_ids=position_ids, cache_position=cache_position,
+                           past_key_values=past_key_values,
                            use_cache=True, return_dict=True)
             past_key_values = output.past_key_values
             actual_cache_length = _cache_length(past_key_values)
@@ -113,11 +115,13 @@ def uncached_greedy(model: Any, input_ids: torch.Tensor, max_new_tokens: int,
         raise ValueError("cache benchmark expects one unpadded prompt (shape [1, seq])")
     device = input_ids.device
     prefix = input_ids
+    attention_mask = torch.ones_like(input_ids)
     generated: list[int] = []
     _sync(device)
     start = time.perf_counter()
     with torch.inference_mode():
-        output = model(input_ids=prefix, use_cache=False, return_dict=True)
+        output = model(input_ids=prefix, attention_mask=attention_mask,
+                       use_cache=False, return_dict=True)
         next_token = _greedy(output.logits)
     _sync(device)
     prefill = time.perf_counter() - start
@@ -133,7 +137,11 @@ def uncached_greedy(model: Any, input_ids: torch.Tensor, max_new_tokens: int,
             if step + 1 == max_new_tokens:
                 break
             prefix = torch.cat([prefix, next_token], dim=-1)
-            output = model(input_ids=prefix, use_cache=False, return_dict=True)
+            attention_mask = torch.cat(
+                [attention_mask, torch.ones((1, 1), device=device, dtype=attention_mask.dtype)], dim=-1
+            )
+            output = model(input_ids=prefix, attention_mask=attention_mask,
+                           use_cache=False, return_dict=True)
             next_token = _greedy(output.logits)
     _sync(device)
     decode = time.perf_counter() - start
