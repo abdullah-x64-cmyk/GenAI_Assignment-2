@@ -75,4 +75,28 @@ Prompt & Output & Exact match & Prefill & Decode & Throughput & Peak memory \\
 \end{table*}
 
 Table~\ref{tab:cache-final} shows lower decode latency and peak allocation for cached decoding in every measured case. The throughput advantage is clearest for longer prompts: cached throughput is approximately 3.0--4.0 times the reference at 512 tokens. Short prompts show a smaller gain. These results cover one validation prompt per requested length on one T4, and therefore characterize this run rather than all inputs or GPU types. Peak allocation includes the resident model and runtime; incremental peak allocation is also retained in the JSON log.
+
+\section{Task 4: Tiled Attention with Online Softmax}
+\label{sec:tiled-attention}
+We implemented a materialized scaled dot-product attention reference and a tiled online-softmax variant in \texttt{src/online\_attention.py}. For each query tile, the tiled method visits key/value tiles and maintains a running maximum $m$, normalization sum $l$, and weighted-value accumulator $a$. For score tile $S$, it updates $m\prime=\max(m,\max(S))$, rescales the previous state by $\alpha=\exp(m-m\prime)$, then adds the shifted tile exponentials to $l$ and their product with values to $a$. The output is $a/l$. This is numerically stable because exponentials are evaluated after subtracting the current maximum. Half and bfloat16 inputs are accumulated in float32. Fully masked rows return zero.
+
+The reference and tiled paths accept boolean visibility masks and additive score masks, including negative infinity for blocked positions. Causal masking allows each query to attend only to its current and preceding keys. For a shorter query suffix over a longer KV sequence, positions are bottom-right aligned. Tests exercise causal attention, additive and boolean masks, fully masked rows, uneven tile boundaries, and suffix queries; outputs agree with the reference and PyTorch SDPA within tight float64 tolerances. The test command and general benchmark command are documented in the README. The current local host has CPU-only PyTorch, so this run could not measure CUDA peak memory.
+
+Table~\ref{tab:attention-cpu} reports a small CPU comparison (batch 1, two heads, head dimension 16, float32; two timed iterations after one warmup). The complete measurements are in \texttt{results/attention\_benchmark\_cpu.json}. At these short lengths, the tiled educational implementation is slower than the materialized reference and PyTorch SDPA. Its theoretical score workspace is smaller: at length 64, the reference score matrix uses 32 KiB while a 16-by-16 tile uses 2 KiB for the same batch, head count, and dtype. This compares score tensors only, not total process memory. The local measurements are noisy and do not establish GPU performance.
+
+\begin{table}[t]
+\centering
+\caption{CPU attention timing in milliseconds (float32).}
+\label{tab:attention-cpu}
+\begin{tabular}{rccc}
+\hline
+Length & Reference & Tiled online & PyTorch SDPA \\
+\hline
+32 & 2.16 & 3.68 & 0.15 \\
+64 & 0.76 & 7.69 & 0.15 \\
+\hline
+\end{tabular}
+\end{table}
+
+The reference and tiled implementations are educational PyTorch code, not fused CUDA kernels. The tiled version dispatches several tensor operators and Python loop iterations per block; optimized attention kernels fuse score calculation, online normalization, and value accumulation while reducing memory traffic. It is therefore reasonable for this clear implementation to run slower even though its live score tile is smaller.
 \bibliographystyle{IEEEtran}\bibliography{references}\end{document}

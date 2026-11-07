@@ -147,3 +147,41 @@ single validation prompt per requested length, so these timings describe this
 T4 run rather than a general hardware guarantee. The old exploratory results
 remain in `results/cache_benchmark_preliminary.csv` for provenance; use the
 final JSON log for Task 3 conclusions.
+
+## Task 4: Tiled attention with online softmax
+
+`src/online_attention.py` provides a materialized scaled dot-product attention
+reference and `tiled_online_softmax_attention`. The tiled method iterates over
+query and key/value blocks and keeps a running row maximum, softmax
+normalization sum, and weighted-value accumulator. It rescales the prior sum
+and accumulator whenever a new tile changes the maximum, which is the online
+log-sum-exp update used to avoid retaining all sequence scores at once. Boolean
+masks use `True` for visible positions; floating masks add score bias (use
+negative infinity to mask). Causal masking supports a query suffix into a
+longer key/value prefix using bottom-right alignment. Half and bfloat16 inputs
+are upcast to float32 for softmax accumulation, and outputs are cast back.
+
+Run the correctness and timing harness on CPU or CUDA:
+
+```bash
+python -m unittest discover -s tests -v
+python src/benchmark_attention.py --device auto --lengths 64,256 --batch 1 --heads 4 --head-dim 32 --include-sdpa --out results/attention_benchmark.json
+```
+
+Correctness tests compare small controlled causal, masked, suffix-query, and
+uneven-tile cases against the reference and PyTorch SDPA using tight float64
+tolerances. The current local CPU microbenchmark is in
+`results/attention_benchmark_cpu.json` (B=1, H=2, D=16, float32, two timed
+iterations). At lengths 32 and 64, the reference took 2.16 and 0.76 ms, the
+educational tiled implementation 3.68 and 7.69 ms, and PyTorch SDPA 0.15 ms
+for both. These small CPU timings are noisy and do not predict GPU performance.
+Peak CUDA memory was unavailable on this CPU-only host. Score-workspace
+estimates at length 64 are 32 KiB for a fully materialized score matrix and
+2 KiB for a 16x16 score tile (B=1, H=2, float32); these exclude other
+temporaries and do not represent measured process memory.
+
+The tiled method is for demonstrating the algorithm and controlling
+intermediate score storage. It uses Python loops and multiple ordinary PyTorch
+operators per tile, so it cannot fuse loads, softmax updates, and value
+accumulation into one GPU kernel. A hardware-optimized fused attention kernel
+can therefore be faster despite doing the same stable computation.
