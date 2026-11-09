@@ -278,3 +278,12 @@ the benchmark view loaded, and the HTML report downloaded successfully. See
 `results/task6_verification.md` and `results/task6_demo_report.html`. The model
 selected an irrelevant sentence for the ECOG criterion; the verification log
 records that error rather than treating successful export as evidence accuracy.
+
+## IEEE technical report
+
+The consolidated paper is in `report/main.tex`, with author details, methods,
+all experiment results, training curves, architecture, confusion matrices,
+attention and decoding graphs, actual application screenshots, error analysis,
+limitations, conclusion, and corrected research references. Build instructions
+are in `report/README.md`. The `report/task1.tex` entry point includes the same
+paper for compatibility. Plot/table regeneration uses archived logs only.
