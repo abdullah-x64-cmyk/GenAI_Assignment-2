@@ -271,3 +271,10 @@ The server binds to `127.0.0.1` by default. To use another local port, set
 `TRIAL_APP_PORT` before launching; `TRIAL_APP_NO_BROWSER=1` disables automatic
 browser opening. The server does not write request bodies or patient records
 to disk or access logs. Screening results exist in the browser until exported.
+
+The live browser workflow was exercised on 10 November 2026 with a synthetic
+patient and both criterion types. Predictions and exact citation text appeared,
+the benchmark view loaded, and the HTML report downloaded successfully. See
+`results/task6_verification.md` and `results/task6_demo_report.html`. The model
+selected an irrelevant sentence for the ECOG criterion; the verification log
+records that error rather than treating successful export as evidence accuracy.

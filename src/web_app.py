@@ -16,6 +16,10 @@ from urllib.request import urlopen
 import webbrowser
 import zipfile
 
+# Use the standard HTTP downloader on local Windows installs. The optional
+# Xet transport can stall before any weight bytes arrive on some networks.
+os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
+
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 sys.path.insert(0, str(ROOT / "src"))
