@@ -233,3 +233,41 @@ passes and cache storage. The benchmark uses validation prompts only and is
 one hardware run. CPU toy tests verify acceptance, rejection correction, EOS,
 and cache alignment; the T4 token equality check provides model-level output
 correctness evidence, not a speedup claim.
+
+## Task 6: Browser-based screening application
+
+The local application is served by `src/web_app.py`; its browser interface is
+in `web/`. On Windows, double-click `setup_and_run.bat`. The first launch
+creates a local virtual environment and installs `requirements-app.txt`, then
+opens `http://127.0.0.1:7860` in the browser. Keep the terminal window open
+while using the application; closing it stops the local server. The first
+screening run loads Qwen2.5-0.5B-Instruct and the LoRA adapter. The adapter is
+restored from `results/task1_submission_artifacts.zip` if needed, and the base
+model is downloaded from Hugging Face on first use. Inference runs on a
+detected CUDA GPU or falls back to CPU. No paid API or model service is used.
+
+Enter a patient record and add one or more inclusion or exclusion criteria.
+Number the patient-note sentences (for example, `1. ... 2. ...`) so the
+application can return the exact quoted evidence text for sentence IDs. The
+application preserves the model's criterion-level label, including “not
+enough information” and “not applicable”; absent evidence is never converted
+into an eligibility decision. Results include the criterion, label, exact
+matching note sentences, explanation, generation time, selected decoding
+path, and any invalid citation IDs. A prompt exceeding the configured input
+window is left-truncated to retain the criterion and later text; the result
+shows a warning and token counts. The report can be downloaded as readable
+HTML or printed from the browser. A prominent prototype notice appears in
+the interface and exported report.
+
+The **Inference lab** view reads the saved project benchmark logs and shows
+the Task 3 cache/no-cache comparison and Task 5 speculative/ordinary greedy
+comparison, including token equality, times, throughput, and acceptance
+results. These are measured T4 validation-run results; they are clearly
+identified as hardware-specific. Users can also choose cached greedy or the
+custom two-layer speculative path for a screening run. Speculative decoding
+may be slower, as the measured benchmark demonstrates.
+
+The server binds to `127.0.0.1` by default. To use another local port, set
+`TRIAL_APP_PORT` before launching; `TRIAL_APP_NO_BROWSER=1` disables automatic
+browser opening. The server does not write request bodies or patient records
+to disk or access logs. Screening results exist in the browser until exported.

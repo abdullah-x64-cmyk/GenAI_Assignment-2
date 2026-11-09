@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6f3">
+  <title>TrialLens | Criterion Screening</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="rail">
+      <a class="brand" href="#screen" aria-label="TrialLens home"><span class="brand-mark">T</span><span>TrialLens</span></a>
+      <div class="rail-label">WORKSPACE</div>
+      <button class="nav-item active" data-view="screen"><span class="nav-icon">▦</span>Screen patient</button>
+      <button class="nav-item" data-view="benchmarks"><span class="nav-icon">◫</span>Inference lab</button>
+      <div class="rail-spacer"></div>
+      <div class="rail-note"><span class="live-dot"></span><span id="rail-status">Checking model</span></div>
+      <div class="rail-foot">LOCAL RESEARCH APP<br>v1.0 · QWEN 2.5 0.5B</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Workspace</span><b>/</b><strong id="crumb-title">Patient screening</strong></div>
+        <div class="top-actions"><span class="local-tag"><span class="tiny-lock">⌑</span> Runs locally</span><span class="avatar">AX</span></div>
+      </header>
+
+      <section class="view active" id="screen-view">
+        <div class="page-heading">
+          <div><div class="eyebrow">CLINICAL TRIAL RESEARCH</div><h1>Criterion screening</h1><p>Review each eligibility criterion against the facts documented in the patient record.</p></div>
+          <div class="model-pill"><span class="model-glyph">✳</span><div><b>Qwen2.5 · Fine-tuned</b><small id="model-subtitle">Checking local adapter…</small></div><span class="status-led" id="model-led"></span></div>
+        </div>
+        <div class="prototype-notice"><span class="notice-icon">i</span><span><b>Educational screening prototype.</b> This research tool is not a clinical enrollment decision. A qualified study team must review all evidence.</span></div>
+
+        <div class="screen-grid">
+          <div class="form-column">
+            <section class="panel patient-panel">
+              <div class="panel-title"><div class="step-num">01</div><div><h2>Patient record</h2><p>Paste a de-identified record. Numbered sentences (for example, <code>1.</code>, <code>2.</code>) make evidence citations easier to verify.</p></div></div>
+              <label class="field-label" for="patient-note">PATIENT DESCRIPTION <span class="muted-label">· source text</span></label>
+              <textarea id="patient-note" placeholder="1. 58-year-old patient diagnosed with ...&#10;2. ECOG performance status is 1.&#10;3. No prior chemotherapy is documented." rows="9"></textarea>
+              <div class="field-footer"><span>Record text stays in this local session.</span><span id="note-count">0 characters</span></div>
+            </section>
+
+            <section class="panel criteria-panel">
+              <div class="panel-title criteria-head"><div class="step-num">02</div><div><h2>Trial criteria</h2><p>Enter criteria from a trial record. Each criterion is evaluated and reported separately.</p></div><button id="add-criterion" class="secondary-button">＋ Add criterion</button></div>
+              <div class="criteria-list" id="criteria-list"></div>
+              <div class="criteria-foot"><span class="count-badge" id="criteria-count">2 criteria</span><span>Use one criterion per row</span></div>
+            </section>
+          </div>
+
+          <aside class="run-column">
+            <section class="panel run-card">
+              <div class="run-card-top"><span class="run-icon">↗</span><div><h2>Run screening</h2><p>Generate labels with evidence citations.</p></div></div>
+              <label class="field-label" for="decode-mode">DECODING PATH</label>
+              <select id="decode-mode" class="select-control"><option value="cached">Greedy · KV cache</option><option value="speculative">Speculative · 2-layer draft</option></select>
+              <div class="mode-help" id="mode-help">Reuses the target model’s key/value cache across generated tokens.</div>
+              <div class="run-divider"></div>
+              <div class="run-detail"><span>Model</span><b>Qwen2.5-0.5B-Instruct</b></div>
+              <div class="run-detail"><span>Output categories</span><b>Expert labels preserved</b></div>
+              <div class="run-detail"><span>Evidence</span><b>Sentence ID + exact text</b></div>
+              <button id="run-screening" class="primary-button"><span class="button-play">▶</span>Run criterion screening</button>
+              <div class="privacy-note">Local inference · no external model API</div>
+            </section>
+            <section class="side-tip"><span>✦</span><div><b>Evidence-first review</b><p>Missing evidence is never treated as proof of eligibility or ineligibility. “Not enough information” and “not applicable” remain distinct labels.</p></div></section>
+          </aside>
+        </div>
+
+        <section class="results-section" id="results-section" hidden>
+          <div class="results-heading"><div><div class="eyebrow">SCREENING OUTPUT</div><h2>Criterion-level results</h2><p id="results-meta"></p></div><div class="results-actions"><button class="secondary-button" id="download-report">⇩ Download report</button><button class="secondary-button" id="print-report">⎙ Print</button></div></div>
+          <div id="results-list" class="results-list"></div>
+          <div class="aggregate-note"><span>ⓘ</span><span>Any overall trial summary is an aggregation of these criterion-level outputs. The dataset does not provide a separate patient–trial ground truth verdict.</span></div>
+        </section>
+      </section>
+
+      <section class="view" id="benchmarks-view">
+        <div class="page-heading"><div><div class="eyebrow">MEASURED INFERENCE</div><h1>Inference lab</h1><p>Compare the decoding mechanisms measured for this project. Timings are hardware-specific research results.</p></div><div class="hardware-pill"><span class="gpu-icon">▰</span><div><b>Tesla T4</b><small>Validation prompts · float32</small></div></div></div>
+        <div class="benchmark-banner"><div class="banner-orb">↗</div><div><b>Same target model. Different token-generation paths.</b><p>Greedy KV caching was faster in all six recorded cases. The tested two-layer speculative draft matched target tokens, but its acceptance was 0%, so it ran slower.</p></div><span class="benchmark-stamp">MEASURED · T4</span></div>
+        <div class="benchmark-grid">
+          <section class="panel benchmark-panel"><div class="benchmark-title"><div><div class="eyebrow">TASK 3</div><h2>KV cache vs recompute</h2></div><span class="verified-chip">✓ Token exact</span></div><p class="benchmark-desc">Cached and reference decoding generated identical tokens. Cache reuse reduces repeated prefix computation.</p><div id="cache-benchmark-table" class="table-wrap"></div><div class="chart-legend"><span><i class="legend-dot green"></i>KV cache</span><span><i class="legend-dot gray"></i>No-cache reference</span></div></section>
+          <section class="panel benchmark-panel"><div class="benchmark-title"><div><div class="eyebrow">TASK 5</div><h2>Speculative vs greedy</h2></div><span class="verified-chip">✓ Token exact</span></div><p class="benchmark-desc">A two-layer draft proposed four tokens per round. No proposals were accepted on either measured prompt.</p><div id="spec-benchmark-table" class="table-wrap"></div><div class="acceptance-callout"><span class="zero-ring">0%</span><span><b>Draft acceptance</b><small>0 of 250 draft tokens accepted per run</small></span></div></section>
+        </div>
+        <div class="benchmark-footnote"><span>ⓘ</span><p>Single-run T4 measurements are illustrative, not general performance guarantees. The speculative method prioritizes correctness; speedup depends on draft acceptance. See the README for exact settings and full JSON logs.</p></div>
+      </section>
+      <footer class="page-footer"><span>TrialLens · Research screening prototype</span><span>Patient record text is not written to access logs or result files.</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
