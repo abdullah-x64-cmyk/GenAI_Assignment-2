@@ -15,9 +15,9 @@ ZIP to a blank Overleaf project and select `main.tex` as its main document.
 Use the pdfLaTeX compiler. The IEEEtran class is required and is included in
 standard TeX Live publishers packages and Overleaf.
 
-The GitHub Actions workflow `Build IEEE technical report` is an optional hosted
-build. Its artifact includes the PDF, log, and resolved bibliography. It uses
-the checked-in figures and does not retrain or rerun held-out evaluation.
+The report is compiled manually in Overleaf. The repository does not run an
+automatic GitHub Actions report build. Compilation uses the checked-in figures
+and does not retrain or rerun held-out evaluation.
 
 The author details were supplied by the student. Research references were
 checked against publisher pages, arXiv, and original model/dataset sources.
